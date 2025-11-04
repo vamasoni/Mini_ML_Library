@@ -1,7 +1,4 @@
-from ._ridge import RidgeRegression     # Optional
-from ._bayes import BayesianRegression  # Optional
+from ._ridge import Ridge
+from ._bayesian import BayesianLinearRegression
 
-__all__ = [
-    'RidgeRegression',     # Optional
-    'BayesianRegression'  # Optional
-]
+__all__ = ["Ridge", "BayesianLinearRegression"]

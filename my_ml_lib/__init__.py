@@ -4,8 +4,8 @@
 my_ml_lib: A foundational machine learning library.
 
 This library provides implementations of common machine learning algorithms
-and tools, built primarily using NumPy, developed as part of the
-Foundations of Machine Learning course assignments.
+and tools, built primarily using NumPy, developed as part of the 
+AI5000: Foundations of Machine Learning course assignments.
 """
 
 # Version of the library
@@ -25,4 +25,3 @@ _submodules = [
 # Primarily includes the submodules. You could add specific important
 # classes/functions here if desired, but listing modules is common.
 __all__ = _submodules
-

@@ -1,44 +1,34 @@
+# my_ml_lib/preprocessing/_gaussian.py
 import numpy as np
 
 class GaussianBasisFeatures:
-    def __init__(self, n_centers=100, sigma=5.0, random_state=None):
-        self.n_centers = n_centers
+    def __init__(self, centers=None, n_centers=20, sigma=None, random_state=None):
+        self.centers = centers
+        self.n_centers = int(n_centers)
         self.sigma = sigma
-        self.centers_ = None
-        self.random_state = random_state # For reproducibility if using random sampling
+        self.random_state = random_state
 
     def fit(self, X, y=None):
-        """
-        Select n_centers random points from X as RBF centers.
-        """
-        # TODO: Determine the centers (mu_j).
-        # Strategy: Randomly sample n_centers points from X
-        # print("GaussianBasisFeatures: Fit method needs implementation.")
-        rng = np.random.RandomState(self.random_state)
-        indices = rng.choice(X.shape[0], self.n_centers, replace=False)
-        self.centers_ = X[indices]
+        X = np.asarray(X)
+        if self.centers is None:
+            rng = np.random.RandomState(self.random_state)
+            indices = rng.choice(X.shape[0], size=self.n_centers, replace=False)
+            self.centers = X[indices]
+        if self.sigma is None:
+            # heuristic: average pairwise distance
+            C = self.centers
+            dists = np.sqrt(((C[:, None, :] - C[None, :, :])**2).sum(axis=2))
+            self.sigma = np.mean(dists)
+            if self.sigma == 0:
+                self.sigma = 1.0
         return self
 
     def transform(self, X):
-        """
-        Transform input X into Gaussian RBF features.
-        Output shape: (n_samples, n_centers)
-        """
-
-        if self.centers_ is None:
-            raise RuntimeError("Transformer is not fitted yet.")
-        # TODO: Apply the RBF formula: exp(-(||X - center||^2 / (2 * sigma^2)))
-      
-    
-        # Compute squared Euclidean distance between each sample and each center
-        # Using broadcasting: ||x - mu||^2 = (x - mu)^2 summed over features
-        # X shape: (n_samples, n_features)
-        # centers_ shape: (n_centers, n_features)
-        print("GaussianBasisFeatures: Transform method needs implementation.")
-
-        return X # Placeholder - need matrix of RBF values
+        X = np.asarray(X)
+        C = self.centers
+        d2 = ((X[:, None, :] - C[None, :, :])**2).sum(axis=2)  # (n_samples, n_centers)
+        return np.exp(-d2 / (2 * (self.sigma ** 2)))
 
     def fit_transform(self, X, y=None):
         self.fit(X, y)
         return self.transform(X)
-

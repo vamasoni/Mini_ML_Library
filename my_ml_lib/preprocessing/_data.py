@@ -1,64 +1,25 @@
-
-
-
-    # In my_ml_lib/preprocessing/_data.py
+# my_ml_lib/preprocessing/_data.py
 import numpy as np
 
 class StandardScaler:
     def __init__(self):
         self.mean_ = None
-        self.scale_ = None # Will store standard deviation
+        self.scale_ = None
 
-
-    ## ToDO
     def fit(self, X, y=None):
-        """
-        Compute the mean and standard deviation to be used for later scaling.
-
-        Args:
-            X (np.ndarray): The data used to compute the mean and standard deviation,
-                            shape (n_samples, n_features).
-            y (None): Ignored. Present for API consistency.
-        """
-        # Calculate mean and std deviation along features (axis=0)
-    
-        
-        # Handle features with zero standard deviation (avoid division by zero)
-        # If std dev is 0, scaling won't change the value (it's already 0 after mean subtraction)
-        # We replace scale_ with 1 in these cases to avoid NaN results.
-      
-            
+        X = np.asarray(X, dtype=float)
+        self.mean_ = X.mean(axis=0)
+        self.scale_ = X.std(axis=0, ddof=0)
+        # avoid division by 0
+        self.scale_[self.scale_ == 0] = 1.0
         return self
 
     def transform(self, X):
-        """
-        Perform standardization by centering and scaling.
-
-        Args:
-            X (np.ndarray): The data to scale, shape (n_samples, n_features).
-
-        Returns:
-            np.ndarray: The scaled data.
-        """
         if self.mean_ is None or self.scale_ is None:
-            raise RuntimeError("This StandardScaler instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator.")
-            
-        # Apply the transformation: 
- 
-        return X_scaled
+            raise RuntimeError("StandardScaler not fitted.")
+        X = np.asarray(X, dtype=float)
+        return (X - self.mean_) / self.scale_
 
     def fit_transform(self, X, y=None):
-        """
-        Fit to data, then transform it.
-
-        Args:
-            X (np.ndarray): The data to fit and transform, shape (n_samples, n_features).
-            y (None): Ignored.
-
-        Returns:
-            np.ndarray: The transformed data.
-        """
-        # Calls fit() and then transform()
-        self.fit(X, y)
+        self.fit(X)
         return self.transform(X)
-

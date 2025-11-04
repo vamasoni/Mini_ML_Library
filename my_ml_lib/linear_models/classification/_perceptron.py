@@ -1,66 +1,54 @@
+# my_ml_lib/linear_models/classification/_perceptron.py
 import numpy as np
 
 class Perceptron:
     """
-    Perceptron classifier.
-
-    Simple algorithm for binary linear classification.
-    Uses iterative updates based on misclassified points.
+    Classic perceptron for binary classification with labels {0,1} or {-1,1}.
+    Uses online updates. Exposes fit/predict.
     """
-    def __init__(self, learning_rate=0.01, max_iters=1000, random_state=None):
-        self.learning_rate = learning_rate
-        self.max_iters = max_iters
+    def __init__(self, max_iter=1000, lr=1.0, random_state=None, verbose=False):
+        self.max_iter = int(max_iter)
+        self.lr = float(lr)
         self.random_state = random_state
-        self.w_ = None # Weights (including bias)
-        self.errors_ = [] # To store number of misclassifications per epoch
+        self.verbose = verbose
+        self.w = None  # includes bias as first element
+
+    def _ensure_labels(self, y):
+        y = np.asarray(y)
+        # map 0->-1, keep 1 as +1
+        if np.any(np.isin(y, [0,1])):
+            y2 = np.where(y == 0, -1, 1)
+            return y2
+        return y  # assume already -1/+1
 
     def fit(self, X, y):
-        """
-        Fit perceptron model.
-
-        Args:
-            X (np.ndarray): Training vectors, shape (n_samples, n_features).
-            y (np.ndarray): Target values (class labels, e.g., 0/1 or -1/1), shape (n_samples,).
-        """
-        # TODO: Implement the Perceptron learning algorithm (Pocket algorithm recommended).
-        # 1. Initialize weights (e.g., randomly or to zeros). Include bias.
-        # 2. Augment X with bias column.
-        # 3. Ensure y labels are appropriate (+1/-1 often used).
-        # 4. Iterate up to max_iters:
-        #    - Loop through samples (or shuffled samples).
-        #    - Make a prediction using the current weights.
-        #    - If misclassified, update weights: w = w + learning_rate * (y_true - y_pred) * x
-        #    - Optionally, implement Pocket algorithm: keep track of the weights
-        #      that achieved the lowest misclassification rate so far.
-        print("Perceptron: Fit method needs implementation.")
+        X = np.asarray(X, dtype=float)
+        y_in = self._ensure_labels(y)
+        n, d = X.shape
         rng = np.random.RandomState(self.random_state)
-        self.w_ = rng.normal(loc=0.0, scale=0.01, size=1 + X.shape[1]) # Placeholder init
-        self.errors_ = []
+        w = np.zeros(d + 1, dtype=float)  # bias plus weights
+        Xb = np.hstack([np.ones((n, 1)), X])
+        for it in range(self.max_iter):
+            updates = 0
+            perm = rng.permutation(n)
+            for i in perm:
+                xi = Xb[i]
+                yi = y_in[i]
+                if yi * (w.dot(xi)) <= 0:
+                    w += self.lr * yi * xi
+                    updates += 1
+            if self.verbose:
+                print(f"Perceptron iter {it}, updates {updates}")
+            if updates == 0:
+                break
+        self.w = w
         return self
 
-    def _predict_raw(self, X):
-        """Calculate net input (scores)."""
-        # Augment X
-        X_augmented = np.hstack([np.ones((X.shape[0], 1)), X])
-        return X_augmented @ self.w_
+    def decision_function(self, X):
+        Xb = np.hstack([np.ones((X.shape[0],1)), X])
+        return Xb.dot(self.w)
 
     def predict(self, X):
-        """
-        Return class label after unit step.
-
-        Args:
-            X (np.ndarray): Samples, shape (n_samples, n_features).
-
-        Returns:
-            np.ndarray: Predicted class labels (e.g., 0/1 or -1/1 depending on fit).
-        """
-        if self.w_ is None:
-            raise RuntimeError("Model is not fitted yet.")
-
-        # TODO: Apply activation function (step function) to raw predictions.
-        # Map output to the format used during training (e.g., 0/1 or -1/1).
-        print("Perceptron: Predict method needs implementation.")
-        # scores = self._predict_raw(X)
-        # predictions = np.where(scores >= 0.0, 1, -1) # Example for -1/1 labels
-        # return predictions
-        return np.zeros(X.shape[0]) # Placeholder
+        scores = self.decision_function(X)
+        # map back to 0/1
+        return (scores >= 0).astype(int)
