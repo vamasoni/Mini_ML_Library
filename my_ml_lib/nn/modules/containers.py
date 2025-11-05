@@ -1,4 +1,3 @@
-# my_ml_lib/nn/modules/containers.py
 class Sequential:
     def __init__(self, *layers):
         self.layers = list(layers)

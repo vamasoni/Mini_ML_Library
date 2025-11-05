@@ -1,4 +1,3 @@
-# my_ml_lib/nn/modules/base.py
 import numpy as np
 
 class Module:
@@ -15,10 +14,12 @@ class Module:
     def zero_grad(self):
         for _, p in self.parameters():
             if hasattr(p, 'grad'):
-                p.grad = np.zeros_like(p.data)
+                try:
+                    p.grad[:] = 0
+                except Exception:
+                    p.grad = np.zeros_like(p.data)
 
     def save_state_dict(self, path):
-        # save parameter numpy arrays
         state = {}
         for name, p in self.parameters():
             state[name] = p.data
