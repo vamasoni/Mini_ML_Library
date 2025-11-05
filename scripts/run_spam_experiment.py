@@ -12,7 +12,8 @@ from my_ml_lib.preprocessing._data import StandardScaler
 from my_ml_lib.linear_models.classification._logistic import LogisticRegression
 from my_ml_lib.model_selection._split import train_test_split
 from my_ml_lib.model_selection._kfold import KFold
-from utils.io_utils import save_model
+from my_ml_lib.utils.io_utils import save_model   # correct import path
+
 
 def run_spam(path="data/spambase.data",
              alphas=None,
@@ -24,7 +25,8 @@ def run_spam(path="data/spambase.data",
              save_model_flag=False):
     """
     Runs cross-validation on Spambase dataset for raw and standardized features,
-    selects best alpha for each, and evaluates on the test set.
+    selects best alpha for each, trains final models, and evaluates train/test errors.
+    Returns a dictionary with best alphas, CV accuracies, train/test accuracies & errors.
     """
     if alphas is None:
         alphas = [0.01, 0.1, 1, 10, 100]
@@ -43,7 +45,7 @@ def run_spam(path="data/spambase.data",
         return np.mean(accs)
 
     # --- Raw data ---
-    best_alpha_raw, best_cv_raw = None, -1
+    best_alpha_raw, best_cv_raw = None, -1.0
     for a in alphas:
         s = cv_score(Xtr, ytr, a)
         if s > best_cv_raw:
@@ -54,28 +56,41 @@ def run_spam(path="data/spambase.data",
     Xtr_s = scaler.fit_transform(Xtr)
     Xte_s = scaler.transform(Xte)
 
-    best_alpha_std, best_cv_std = None, -1
+    best_alpha_std, best_cv_std = None, -1.0
     for a in alphas:
         s = cv_score(Xtr_s, ytr, a)
         if s > best_cv_std:
             best_cv_std, best_alpha_std = s, a
 
-    # --- Final train/test evaluation ---
+    # --- Final train/test evaluation (raw) ---
     clf_raw = LogisticRegression(alpha=best_alpha_raw, max_iter=max_iter, tol=tol, verbose=verbose)
     clf_raw.fit(Xtr, ytr)
+    train_acc_raw = (clf_raw.predict(Xtr) == ytr).mean()
     raw_test_acc = (clf_raw.predict(Xte) == yte).mean()
+    train_err_raw = 1.0 - train_acc_raw
+    test_err_raw = 1.0 - raw_test_acc
 
+    # --- Final train/test evaluation (standardized) ---
     clf_std = LogisticRegression(alpha=best_alpha_std, max_iter=max_iter, tol=tol, verbose=verbose)
     clf_std.fit(Xtr_s, ytr)
+    train_acc_std = (clf_std.predict(Xtr_s) == ytr).mean()
     std_test_acc = (clf_std.predict(Xte_s) == yte).mean()
+    train_err_std = 1.0 - train_acc_std
+    test_err_std = 1.0 - std_test_acc
 
     results = {
         "best_alpha_raw": best_alpha_raw,
         "cv_acc_raw": best_cv_raw,
+        "train_acc_raw": train_acc_raw,
         "test_acc_raw": raw_test_acc,
+        "train_err_raw": train_err_raw,
+        "test_err_raw": test_err_raw,
         "best_alpha_std": best_alpha_std,
         "cv_acc_std": best_cv_std,
-        "test_acc_std": std_test_acc
+        "train_acc_std": train_acc_std,
+        "test_acc_std": std_test_acc,
+        "train_err_std": train_err_std,
+        "test_err_std": test_err_std
     }
 
     # optional saving
@@ -112,5 +127,9 @@ if __name__ == "__main__":
     )
 
     print("\n=== Spambase Experiment Results ===")
+    # pretty-print results with sensible formatting
     for k, v in res.items():
-        print(f"{k:20s}: {v:.4f}" if isinstance(v, float) else f"{k:20s}: {v}")
+        if isinstance(v, float):
+            print(f"{k:20s}: {v:.4f}")
+        else:
+            print(f"{k:20s}: {v}")
