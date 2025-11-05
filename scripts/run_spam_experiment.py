@@ -12,7 +12,7 @@ from my_ml_lib.preprocessing._data import StandardScaler
 from my_ml_lib.linear_models.classification._logistic import LogisticRegression
 from my_ml_lib.model_selection._split import train_test_split
 from my_ml_lib.model_selection._kfold import KFold
-from my_ml_lib.utils.io_utils import save_model   # correct import path
+from utils.io_utils import save_model   # correct import path
 
 
 def run_spam(path="data/spambase.data",

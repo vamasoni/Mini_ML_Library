@@ -1,6 +1,6 @@
 # my_ml_lib/nn/modules/losses.py
 import numpy as np
-from ..autograd import Value
+from .autograd import Value
 
 class CrossEntropyLoss:
     """
