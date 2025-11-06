@@ -500,8 +500,8 @@ if __name__ == "__main__":
     p.add_argument("--softmax_solver", choices=["ls", "ridge", "sgd"], default="sgd")
     p.add_argument("--softmax_ridge_lambda", type=float, default=1e-4)
     p.add_argument("--softmax_sgd_lr", type=float, default=1e-3)
-    p.add_argument("--softmax_sgd_epochs", type=int, default=20)
-    p.add_argument("--softmax_sgd_batch", type=int, default=256)
+    p.add_argument("--softmax_sgd_epochs", type=int, default=10)
+    p.add_argument("--softmax_sgd_batch", type=int, default=128)
     p.add_argument("--softmax_sgd_l2", type=float, default=1e-5)
 
     # Poly
@@ -510,24 +510,24 @@ if __name__ == "__main__":
     p.add_argument("--poly_ridge_lambda", type=float, default=1e-4)
     p.add_argument("--poly_sgd_lr", type=float, default=1e-2)
     p.add_argument("--poly_sgd_epochs", type=int, default=10)
-    p.add_argument("--poly_sgd_batch", type=int, default=256)
+    p.add_argument("--poly_sgd_batch", type=int, default=128)
     p.add_argument("--poly_sgd_l2", type=float, default=0.0)
 
     # RBF
-    p.add_argument("--rbf_centers", type=int, default=30)
-    p.add_argument("--rbf_softmax_solver", choices=["ls","ridge","sgd"], default="ls")
+    p.add_argument("--rbf_centers", type=int, default=10)
+    p.add_argument("--rbf_softmax_solver", choices=["ls","ridge","sgd"], default="sgd")
     p.add_argument("--rbf_ridge_lambda", type=float, default=1e-4)
     p.add_argument("--rbf_sgd_lr", type=float, default=1e-1)
-    p.add_argument("--rbf_sgd_epochs", type=int, default=20)
-    p.add_argument("--rbf_sgd_batch", type=int, default=256)
-    p.add_argument("--rbf_sgd_l2", type=float, default=1e-1)
+    p.add_argument("--rbf_sgd_epochs", type=int, default=10)
+    p.add_argument("--rbf_sgd_batch", type=int, default=128)
+    p.add_argument("--rbf_sgd_l2", type=float, default=0)
 
     # MLP
     p.add_argument("--mlp_hidden", type=int, nargs="+", default=[128])
     p.add_argument("--mlp_lr", type=float, default=1e-1)
-    p.add_argument("--mlp_epochs", type=int, default=20)
-    p.add_argument("--mlp_batch", type=int, default=256)
-    p.add_argument("--mlp_l2", type=float, default=1e-1)
+    p.add_argument("--mlp_epochs", type=int, default=5)
+    p.add_argument("--mlp_batch", type=int, default=128)
+    p.add_argument("--mlp_l2", type=float, default=0)
 
     args = p.parse_args()
     main(args)
